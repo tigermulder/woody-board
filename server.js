@@ -14,10 +14,17 @@ const middlewares = jsonServer.defaults();
 
 // --- 공통 응답 포맷 미들웨어 ---
 server.use(jsonServer.bodyParser);
+
+server.use((req, res, next) => {
+  // 네트워크 지연 시뮬레이션
+  const delay = Math.floor(Math.random() * 300) + 200;
+
+  setTimeout(next, delay);
+});
+
 server.use((req, res, next) => {
   const originalJson = res.json.bind(res);
   res.json = (data) => {
-    // 이미 규격화된 응답은 그대로 반환
     if (data && (data.data || data.error)) return originalJson(data);
 
     if (res.statusCode >= 400) {
@@ -33,7 +40,7 @@ server.use((req, res, next) => {
   next();
 });
 
-// --- 커스텀 라우팅: API 스펙 ---
+// --- API 스펙 ---
 
 // 컬럼 조회
 server.get("/api/columns", (req, res) => {
