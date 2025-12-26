@@ -6,3 +6,8 @@ export const apiClient = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+apiClient.interceptors.response.use(
+  (response) => response.data.data,
+  (error) => Promise.reject(error.response?.data?.error)
+);
