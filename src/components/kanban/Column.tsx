@@ -1,4 +1,5 @@
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { CardItem } from "@/components/kanban/CardItem";
 import {
 	Button,
 	DropdownMenu,
@@ -63,7 +64,16 @@ export function Column({ column }: { column: ColumnType }) {
 
 			{/* 카드 리스트 (ScrollArea 적용 예정 구역) */}
 			<div className="flex flex-col gap-3">
-				{/* 카드들이 들어갈 자리입니다. */}
+				{column.cards.map((card) => (
+					<CardItem key={card.id} card={card} />
+				))}
+
+				{/* 카드가 하나도 없을 때 보여줄 안내 */}
+				{column.cards.length === 0 && (
+					<div className="flex h-24 items-center justify-center rounded-lg border-2 border-muted-foreground/10 border-dashed text-muted-foreground text-xs">
+						카드가 없습니다
+					</div>
+				)}
 			</div>
 
 			{/* 카드 추가 버튼 */}

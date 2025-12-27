@@ -56,7 +56,7 @@ export const kanbanApi = {
 	// 카드 수정
 	updateCard: async (
 		id: string,
-		params: Partial<Pick<CardType, "title" | "description" | "due_date">>,
+		params: Partial<Pick<CardType, "title" | "description" | "dueDate">>,
 	) => {
 		return await axiosInstance.patch<ApiSuccess<CardType>, CardType>(
 			`/cards/${id}`,

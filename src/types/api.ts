@@ -15,17 +15,17 @@ export interface ColumnType {
 	id: string;
 	title: string;
 	order: number;
-	created_at: string;
+	createdAt: string;
 	cards: CardType[];
 }
 
 export interface CardType {
 	id: string;
-	column_id: string;
+	columnId: string;
 	title: string;
 	description: string;
-	due_date: string | null;
+	dueDate: string | null;
 	order: number;
-	created_at: string;
-	updated_at: string;
+	createdAt: string;
+	updatedAt: string;
 }

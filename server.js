@@ -17,6 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const dbPath = resolve(__dirname, "db.json");
 
+server.use(jsonServer.defaults());
 // --- 공통 응답 포맷 미들웨어 ---
 server.use(jsonServer.bodyParser);
 
