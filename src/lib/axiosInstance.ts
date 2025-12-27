@@ -1,4 +1,5 @@
-import axios from "axios";
+import type { ApiResponse } from "@/types/api";
+import axios, { type AxiosResponse } from "axios";
 
 export const axiosInstance = axios.create({
   baseURL: "http://localhost:4000/api",
@@ -8,11 +9,11 @@ export const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  <T>(response: AxiosResponse<ApiResponse<T>>): T => {
+    return response.data.data; // data 가공
+  },
   (error) => {
-    const serverError = error.response?.data?.error;
-    return Promise.reject(
-      serverError || { message: "네트워크 오류가 발생했습니다." }
-    );
+    // 서버가 내려주는 공통 에러
+    return Promise.reject(error.response?.data?.error);
   }
 );
