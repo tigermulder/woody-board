@@ -5,5 +5,7 @@ export const useColumns = () => {
   return useQuery({
     queryKey: ["columns"],
     queryFn: kanbanApi.getColumns,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 };
