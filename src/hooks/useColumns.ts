@@ -5,7 +5,8 @@ export const useColumns = () => {
   return useQuery({
     queryKey: ["columns"],
     queryFn: kanbanApi.getColumns,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
+    staleTime: Infinity, // 사용자의 serverAction전까지는 자동갱신 X
+    refetchOnWindowFocus: false, // 윈도우 포커스 시 자동갱신 X
+    gcTime: 1000 * 60 * 60, // 1시간동안 gc에 보관
   });
 };
