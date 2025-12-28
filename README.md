@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+# woody-board
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+칸반 보드 형태로 컬럼/카드를 관리하는 간단한 웹 앱입니다. 드래그앤드롭으로 카드 이동/정렬을 지원합니다.
 
-Currently, two official plugins are available:
+## 실행 방법
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Node.js 버전**: `v24+` 권장
 
-## React Compiler
+- **설치**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **개발 실행(프론트만)**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run start
 ```
+
+- **목 서버(mock API) 실행**
+
+```bash
+npm run mock
+```
+
+- **프론트 + 목 서버 동시 실행**
+
+```bash
+npm run dev
+```
+
+기본 API는 `http://localhost:4000/api`를 사용합니다.
+
+## 기술 스택
+
+- **React + TypeScript + Vite**
+  - 개발 속도/생산성(빠른 HMR)과 타입 안정성을 우선했습니다.
+- **@tanstack/react-query**
+  - 서버 상태(컬럼/카드)를 캐시에 두고, 조회/변경/에러 처리 흐름을 단순하게 가져가기 위해 사용했습니다.
+- **axios**
+  - API 레이어를 분리하고 인터셉터로 공통 응답 포맷/에러 정규화를 처리했습니다.
+- **@dnd-kit**
+  - 칸반 보드의 핵심인 드래그앤드롭(이동/정렬)을 안정적으로 구현하기 위해 선택했습니다.
+- **Tailwind CSS + Radix UI(shadcn/ui)**
+  - 빠르게 UI를 구성하면서도 접근성/일관성을 챙기기 위해 사용했습니다.
+- **json-server**
+  - 별도 백엔드 없이도 CRUD 플로우를 확인할 수 있도록 목 API를 구성했습니다.
+
+## 구현 기능
+
+- **컬럼**
+  - 컬럼 목록 조회
+  - 컬럼 생성/제목 수정/삭제
+- **카드**
+  - 카드 생성/수정/삭제
+  - 드래그앤드롭으로 카드 이동(컬럼 간 이동) 및 정렬(같은 컬럼 내 reorder)
+- **UX**
+  - 로딩 스켈레톤, 에러 상태/재시도, 토스트 알림
+  - 다크/라이트 테마
+
+### 미구현 기능(및 사유)
+
+- **사용자/권한/동시 편집 충돌 처리**
+  - 멀티 유저 환경에서의 락/충돌 해결 정책은 서버 스펙이 필요해 우선 제외했습니다.
+- **보드/프로젝트 다중화**
+  - 현재 `columns` 단일 리소스 기준으로 단순화되어 있어, 확장 시 queryKey/라우팅 구조 변경이 필요합니다.
+
+## 설계 결정
+
+### 상태 관리 전략
+
+- **서버 상태(컬럼/카드)**: React Query로 관리합니다.
+  - 변경(mutation) 성공 시 `["columns"]`를 invalidate하여 데이터 정합성을 유지합니다.
+  - 멀티유저를 고려해 `staleTime`을 무한대가 아니라 짧게 두고, 포커스/재연결 refetch 및 폴링을 사용합니다.
+  - 드래그 중에는 낙관적 캐시를 직접 조작하므로 refetch를 일시 중지하여 UI 튐을 방지합니다.
+- **UI 상태**: `KanbanContext`로 드래그 중 카드(`activeId`), 선택 카드(`selectedCardId`) 같은 화면 전용 상태를 분리했습니다.
+
+### 컴포넌트 설계 원칙
+
+- **도메인 컴포넌트와 공용 UI 분리**
+  - `src/components/kanban/*`: 보드/컬럼/카드 등 도메인 로직
+  - `src/components/ui/*`: 재사용 가능한 공용 UI(shadcn/ui 기반)
+- **API/훅 레이어 분리**
+  - `src/api/*`: HTTP 요청 단위
+  - `src/hooks/*`: 화면에서 쓰기 쉬운 query/mutation 훅
+- **보드 로직 분리**
+  - DnD 처리(`useBoardDnd`)와 React Query 캐시 접근(`useColumnsCache`)을 훅으로 분리해 `Board`는 “뷰 + 핸들러 연결”에 집중하도록 정리했습니다.
+
+### 기타 결정 사항
+
+- **응답/에러 표준화**
+  - `axiosInstance`에서 응답 언랩 및 에러 메시지 정규화로 UI 코드를 단순화했습니다.
+- **기능 인지(UX)**
+  - 작업하면서 가장 많이 고민했던 부분은 “사용자가 지금 무엇을 할 수 있는지/무엇이 바뀌었는지”를 시각적으로 즉시 이해시키는 것이었습니다.
+  - 버튼/다이얼로그/토스트, 로딩 스켈레톤, 드래그 오버 상태 하이라이트 같은 피드백을 통해 사용자가 맥락을 잃지 않도록 구성했습니다.
+- **드래그 처리**
+  - 드래그 도중은 낙관적 업데이트로 즉시 반영하고, 드래그 종료 시 변경된 카드만 서버에 반영합니다.
+
+## 개선하고 싶은 점 (선택)
+
+- **i18n(다국어)**
+  - 문구가 늘어날수록 하드코딩이 유지보수에 불리해서, `i18next` 같은 라이브러리로 문구를 분리하고 한국어/영어를 쉽게 전환할 수 있게 정리하고 싶습니다.
+- **리팩터링(컴포넌트/로직 분리)**
+  - `Board.tsx`의 UI 조각을 더 작게 나누고 싶습니다.
+    - 컬럼 추가 영역(입력폼/버튼/외부클릭 닫기): `AddColumnPanel`
+    - 빈 상태(컬럼 0개 안내): `EmptyBoardState`
+    - 드래그 오버레이 카드 렌더링: `DraggedCardOverlay`
+  - `Column.tsx`도 책임을 줄이고 싶습니다.
+    - 제목 인라인 편집 로직: `useEditableTitle()`
+    - 삭제 확인 다이얼로그: `DeleteColumnDialog`
+    - 카드 추가 Sheet(폼/검증/토스트): `useAddCardForm()` 또는 `CardAddSheetContainer`
+- **queryKey 확장**
+  - 보드/프로젝트가 생기면 `["columns", boardId]` 형태로 키를 분리해 캐시 충돌을 방지하고 싶습니다.
+- **동시 편집 충돌 정책**
+  - 카드 이동/수정 시 버전 관리(optimistic concurrency)나 서버 측 정렬 규칙을 두어 충돌을 명확히 처리하고 싶습니다.
