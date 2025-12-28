@@ -9,3 +9,5 @@ export * from "./label";
 export * from "./progress";
 export * from "./resizable";
 export * from "./scroll-area";
+export * from "./tooltip";
+export * from "./sonner";
