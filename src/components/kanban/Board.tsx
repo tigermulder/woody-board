@@ -15,7 +15,7 @@ export function Board() {
 
 				{/* 새 컬럼 추가 버튼 */}
 				<div className="h-fit w-80 shrink-0 rounded-xl border-2 border-dashed p-3 opacity-60 transition-opacity hover:opacity-100">
-					<Button variant="ghost" className="h-20 w-full gap-2">
+					<Button variant="ghost" className="h-20 w-full cursor-pointer gap-2">
 						<span className="text-xl">+</span>
 						<span className="font-medium">컬럼 추가</span>
 					</Button>
