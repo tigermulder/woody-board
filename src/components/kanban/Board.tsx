@@ -10,9 +10,11 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { kanbanApi } from "@/api/kanban";
 import { Column } from "@/components/kanban/Column";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button, Input, ScrollArea, ScrollBar } from "@/components/ui";
 import { useKanbanDispatch, useKanbanState } from "@/contexts/KanbanContext";
 import { useColumnActions } from "@/hooks/useColumnActions";
@@ -50,7 +52,14 @@ function buildCardPositionMap(columns: ColumnType[]) {
 }
 
 export function Board() {
-  const { data: columns, isLoading, refetch } = useColumns();
+  const {
+    data: columns,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useColumns();
   const { add } = useColumnActions();
   const queryClient = useQueryClient();
   const { activeId } = useKanbanState();
@@ -124,7 +133,33 @@ export function Board() {
     return await promise;
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  // 전역 로딩바(GlobalQueryLoadingBar)도 동작하지만, 최초 진입 시엔 화면 레이아웃 점프를 줄이기 위해 유지
+  if (isLoading)
+    return <div className="p-6 text-muted-foreground">Loading...</div>;
+
+  if (isError) {
+    const isNetworkError = error.code === "NETWORK_ERROR";
+    return (
+      <div className="p-6">
+        <Alert variant="destructive" className="max-w-xl">
+          {isNetworkError ? <WifiOff /> : null}
+          <AlertTitle>데이터를 불러오지 못했습니다</AlertTitle>
+          <AlertDescription>
+            <p>{error.message}</p>
+            <div className="mt-3 flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => void refetch()}
+                disabled={isFetching}
+              >
+                재시도
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   const overlayCard: CardType | null = (() => {
     if (!activeId || !columns) return null;
