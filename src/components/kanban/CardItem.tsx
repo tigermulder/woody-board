@@ -2,6 +2,9 @@ import { AlignLeft, Calendar, CalendarX2 } from "lucide-react";
 import { useState } from "react";
 import { Progress } from "@/components/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { CardDetailSheet } from "@/components/kanban/CardDetailSheet";
+import { useKanbanDispatch, useKanbanState } from "@/contexts/KanbanContext";
 import { cn } from "@/lib/utils";
 import type { CardType } from "@/types/api";
 
@@ -32,81 +35,101 @@ export function CardItem({ card }: { card: CardType }) {
   const [isPressed, setIsPressed] = useState(false);
   const dDayStats = getScheduleStats(card.dueDate);
   const hasDescription = Boolean(card.description?.trim());
+  const { selectedCardId } = useKanbanState();
+  const { setSelectedCardId } = useKanbanDispatch();
+  const isOpen = selectedCardId === card.id;
 
   return (
-    <Card
-      onPointerDown={() => setIsPressed(true)}
-      onPointerUp={() => setIsPressed(false)}
-      onPointerCancel={() => setIsPressed(false)}
-      onPointerLeave={() => setIsPressed(false)}
-      className={cn(
-        "group flex min-h-[120px] cursor-pointer flex-col border-none bg-white shadow-sm transition-all duration-150 hover:shadow-md hover:ring-2 dark:bg-slate-800",
-        isPressed && "translate-y-px scale-[0.99]",
-        hasDescription
-          ? "hover:bg-primary/5 hover:ring-primary/25 dark:hover:bg-primary/10"
-          : "hover:ring-primary/10"
-      )}
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => setSelectedCardId(open ? card.id : null)}
     >
-      <CardHeader className="px-4 pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-start gap-1.5">
-            <CardTitle className="line-clamp-2 font-bold text-foreground/90 text-sm leading-snug">
-              {card.title}
-            </CardTitle>
-            {hasDescription ? (
-              <AlignLeft
-                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground/60"
-                aria-label="상세 내용 있음"
-              />
-            ) : null}
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="mt-auto space-y-2">
-          <div className="flex items-center justify-between gap-3 font-medium text-[11px] text-muted-foreground/60">
-            <div className="flex items-center gap-1.5">
-              {card.dueDate ? (
-                <Calendar className="h-3 w-3" />
-              ) : (
-                <CalendarX2 className="h-3 w-3" />
-              )}
-              <span>
-                {card.dueDate
-                  ? new Date(card.dueDate).toLocaleDateString("ko-KR")
-                  : "완료일 없음"}
-              </span>
-            </div>
-
-            {dDayStats && (
-              <div className="flex items-center gap-1.5 font-bold text-[10px]">
-                <span
-                  className={cn(
-                    dDayStats.diffDays <= 3
-                      ? "text-destructive"
-                      : "text-primary"
-                  )}
-                >
-                  {dDayStats.diffDays < 0
-                    ? "마감 지남"
-                    : `D-${dDayStats.diffDays}`}
-                </span>
-                <span className="text-muted-foreground/70">·</span>
-                <span className="text-muted-foreground">
-                  임박도 {Math.round(dDayStats.progress)}%
-                </span>
-              </div>
-            )}
-          </div>
-
-          {dDayStats ? (
-            <Progress value={dDayStats.progress} className="h-1" />
-          ) : (
-            <div className="h-1" aria-hidden />
+      <SheetTrigger asChild>
+        <Card
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setSelectedCardId(card.id);
+            }
+          }}
+          onPointerDown={() => setIsPressed(true)}
+          onPointerUp={() => setIsPressed(false)}
+          onPointerCancel={() => setIsPressed(false)}
+          onPointerLeave={() => setIsPressed(false)}
+          className={cn(
+            "group flex min-h-[120px] cursor-pointer flex-col border-none bg-white shadow-sm transition-all duration-150 hover:shadow-md hover:ring-2 dark:bg-slate-800",
+            isPressed && "translate-y-px scale-[0.99]",
+            hasDescription
+              ? "hover:bg-primary/5 hover:ring-primary/25 dark:hover:bg-primary/10"
+              : "hover:ring-primary/10"
           )}
-        </div>
-      </CardContent>
-    </Card>
+        >
+          <CardHeader className="px-4 pb-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex min-w-0 items-start gap-1.5">
+                <CardTitle className="line-clamp-2 font-bold text-foreground/90 text-sm leading-snug">
+                  {card.title}
+                </CardTitle>
+                {hasDescription ? (
+                  <AlignLeft
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground/60"
+                    aria-label="상세 내용 있음"
+                  />
+                ) : null}
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div className="mt-auto space-y-2">
+              <div className="flex items-center justify-between gap-3 font-medium text-[11px] text-muted-foreground/60">
+                <div className="flex items-center gap-1.5">
+                  {card.dueDate ? (
+                    <Calendar className="h-3 w-3" />
+                  ) : (
+                    <CalendarX2 className="h-3 w-3" />
+                  )}
+                  <span>
+                    {card.dueDate
+                      ? new Date(card.dueDate).toLocaleDateString("ko-KR")
+                      : "완료일 없음"}
+                  </span>
+                </div>
+
+                {dDayStats && (
+                  <div className="flex items-center gap-1.5 font-bold text-[10px]">
+                    <span
+                      className={cn(
+                        dDayStats.diffDays <= 3
+                          ? "text-destructive"
+                          : "text-primary"
+                      )}
+                    >
+                      {dDayStats.diffDays < 0
+                        ? "마감 지남"
+                        : `D-${dDayStats.diffDays}`}
+                    </span>
+                    <span className="text-muted-foreground/70">·</span>
+                    <span className="text-muted-foreground">
+                      임박도 {Math.round(dDayStats.progress)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {dDayStats ? (
+                <Progress value={dDayStats.progress} className="h-1" />
+              ) : (
+                <div className="h-1" aria-hidden />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </SheetTrigger>
+
+      <CardDetailSheet card={card} />
+    </Sheet>
   );
 }

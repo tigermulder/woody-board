@@ -14,3 +14,6 @@ export * from "./sheet";
 export * from "./sonner";
 export * from "./textarea";
 export * from "./tooltip";
+export * from "./calendar";
+export * from "./popover";
+export * from "./date-picker-with-input";

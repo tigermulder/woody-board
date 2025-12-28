@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { CardAddSheet } from "@/components/kanban/CardAddSheet";
 import { CardItem } from "@/components/kanban/CardItem";
 import {
   AlertDialog,
@@ -20,21 +21,8 @@ import {
   DropdownMenuItem,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
   Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
-  Textarea,
 } from "@/components/ui";
 import { useCardActions } from "@/hooks/useCardActions";
 import { useColumnActions } from "@/hooks/useColumnActions";
@@ -51,7 +39,7 @@ const cardFormSchema = z.object({
   dueDate: z.string().nullable().optional(),
 });
 
-type CardFormValues = z.infer<typeof cardFormSchema>;
+export type CardFormValues = z.infer<typeof cardFormSchema>;
 
 const columnBgColors: Record<string, string> = {
   "To Do": "bg-slate-200/70 dark:bg-slate-800/70",
@@ -66,7 +54,7 @@ export function Column({ column }: { column: ColumnType }) {
   const { remove } = useColumnActions();
   const { add } = useCardActions();
 
-  // 2. React Hook Form 초기화
+  // React Hook Form 초기화
   const form = useForm<CardFormValues>({
     resolver: zodResolver(cardFormSchema),
     defaultValues: {
@@ -137,7 +125,7 @@ export function Column({ column }: { column: ColumnType }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
             <DropdownMenuItem className="cursor-pointer">
-              수정하기{" "}
+              Edit{" "}
               <DropdownMenuShortcut>
                 <Pencil className="h-3.5 w-3.5" />
               </DropdownMenuShortcut>
@@ -146,7 +134,7 @@ export function Column({ column }: { column: ColumnType }) {
               className="cursor-pointer text-destructive focus:text-destructive"
               onClick={() => setDeleteDialogOpen(true)}
             >
-              삭제하기{" "}
+              Delete{" "}
               <DropdownMenuShortcut>
                 <Trash2 className="h-3.5 w-3.5" />
               </DropdownMenuShortcut>
@@ -176,18 +164,14 @@ export function Column({ column }: { column: ColumnType }) {
           </div>
           <AlertDialogFooter className="bg-muted/40 p-4 px-6">
             <AlertDialogCancel disabled={remove.isPending}>
-              취소
+              Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={remove.isPending}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
-              {remove.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                "확인"
-              )}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -222,114 +206,12 @@ export function Column({ column }: { column: ColumnType }) {
             <span className="text-xl">+</span> 카드 추가
           </Button>
         </SheetTrigger>
-        <SheetContent className="flex flex-col gap-6">
-          <SheetHeader>
-            <SheetTitle>카드 추가</SheetTitle>
-            <SheetDescription>새로운 작업을 정의해 주세요.</SheetDescription>
-          </SheetHeader>
-
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-1 flex-col gap-8 p-4"
-            >
-              <div className="flex-1 space-y-6">
-                {/* 제목 필드 */}
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold text-foreground/80 text-sm">
-                        제목
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="어떤 일을 해야 하나요?"
-                          className="h-12 border-muted-foreground/20 focus-visible:ring-primary/30"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage className="font-medium text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                {/* 설명 필드 */}
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold text-foreground/80 text-sm">
-                        설명
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="상세한 내용을 입력해 주세요."
-                          className="min-h-[150px] resize-none border-muted-foreground/20 focus-visible:ring-primary/30"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* 마감일 필드 */}
-                <FormField
-                  control={form.control}
-                  name="dueDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold text-foreground/80 text-sm">
-                        마감일
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type="date"
-                            className="h-12 border-muted-foreground/20 focus-visible:ring-primary/30"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <SheetFooter className="flex-row gap-2 p-0">
-                <Button
-                  type="button"
-                  size="lg"
-                  variant="secondary"
-                  className="flex-1 font-bold"
-                  onClick={() => setAddSheetOpen(false)}
-                >
-                  취소
-                </Button>
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex-1 font-bold"
-                  disabled={add.isPending}
-                >
-                  {add.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>생성 중...</span>
-                    </div>
-                  ) : (
-                    "카드 추가"
-                  )}
-                </Button>
-              </SheetFooter>
-            </form>
-          </Form>
-        </SheetContent>
+        <CardAddSheet
+          form={form}
+          onSubmit={onSubmit}
+          isPending={add.isPending}
+          onCancel={() => setAddSheetOpen(false)}
+        />
       </Sheet>
     </div>
   );

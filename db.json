@@ -46,8 +46,9 @@
       "columnId": "col_003",
       "title": "개발 환경 세팅",
       "description": "Vite + React + TypeScript 프로젝트 초기 설정 완료",
-      "dueDate": null,
-      "order": 0
+      "dueDate": "2025-12-31",
+      "order": 0,
+      "updated_at": "2025-12-28T05:00:30.616Z"
     },
     {
       "id": "card_005",
@@ -58,16 +59,6 @@
       "order": 0
     },
     {
-      "id": "c6624a46-6ec8-434b-bc97-960c7450f9c0",
-      "columnId": "col_002",
-      "title": "test",
-      "description": "",
-      "dueDate": null,
-      "order": 1,
-      "created_at": "2025-12-28T03:34:10.877Z",
-      "updated_at": "2025-12-28T03:34:10.877Z"
-    },
-    {
       "id": "2369f63f-fae3-4818-87cd-2d2993191bb7",
       "columnId": "col_002",
       "title": "test2",
@@ -76,6 +67,16 @@
       "order": 2,
       "created_at": "2025-12-28T03:40:32.044Z",
       "updated_at": "2025-12-28T03:40:32.044Z"
+    },
+    {
+      "id": "9d4dc925-f816-4c7b-b326-113d9e19f9e3",
+      "columnId": "col_003",
+      "title": "test",
+      "description": "test 입니다",
+      "dueDate": null,
+      "order": 1,
+      "created_at": "2025-12-28T04:28:37.529Z",
+      "updated_at": "2025-12-28T04:44:56.826Z"
     }
   ]
 }
