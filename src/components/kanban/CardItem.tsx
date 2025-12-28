@@ -1,4 +1,6 @@
-import { AlignLeft, Calendar, CalendarX2 } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { AlignLeft, Calendar, CalendarX2, GripVertical } from "lucide-react";
 import { useState } from "react";
 import { CardDetailSheet } from "@/components/kanban/CardDetailSheet";
 import { Progress } from "@/components/ui";
@@ -38,6 +40,26 @@ export function CardItem({ card }: { card: CardType }) {
 	const { selectedCardId } = useKanbanState();
 	const { setSelectedCardId } = useKanbanDispatch();
 	const isOpen = selectedCardId === card.id;
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		setActivatorNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id: card.id });
+
+	const style: React.CSSProperties = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+		opacity: isDragging ? 0.5 : undefined,
+	};
+
+	const listenerMap = listeners as unknown as {
+		onPointerDown?: (e: unknown) => void;
+		onKeyDown?: (e: unknown) => void;
+	};
 
 	return (
 		<Sheet
@@ -46,6 +68,8 @@ export function CardItem({ card }: { card: CardType }) {
 		>
 			<SheetTrigger asChild>
 				<Card
+					ref={setNodeRef}
+					style={style}
 					role="button"
 					tabIndex={0}
 					onKeyDown={(e) => {
@@ -64,6 +88,7 @@ export function CardItem({ card }: { card: CardType }) {
 						hasDescription
 							? "hover:bg-primary/5 hover:ring-primary/25 dark:hover:bg-primary/10"
 							: "hover:ring-primary/10",
+						isDragging && "ring-2 ring-primary/30",
 					)}
 				>
 					<CardHeader className="px-4 pb-2">
@@ -79,6 +104,34 @@ export function CardItem({ card }: { card: CardType }) {
 									/>
 								) : null}
 							</div>
+
+							{/* Drag handle (시트 오픈과 충돌 방지) */}
+							<button
+								type="button"
+								ref={setActivatorNodeRef}
+								{...attributes}
+								// IMPORTANT: capture 단계에서 stopPropagation을 하면 dnd-kit의
+								// onPointerDown(버블)이 실행되지 않아 드래그가 시작되지 않습니다.
+								onPointerDown={(e) => {
+									listenerMap.onPointerDown?.(e);
+									e.stopPropagation();
+								}}
+								onKeyDown={(e) => {
+									listenerMap.onKeyDown?.(e);
+								}}
+								onClick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+								}}
+								className={cn(
+									"inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/60",
+									"hover:bg-muted/50 hover:text-muted-foreground",
+									"cursor-grab active:cursor-grabbing",
+								)}
+								aria-label="드래그해서 이동"
+							>
+								<GripVertical className="h-4 w-4" />
+							</button>
 						</div>
 					</CardHeader>
 
