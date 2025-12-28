@@ -101,7 +101,6 @@ export function CardAddSheet({
 											onChange={field.onChange}
 											onBlur={field.onBlur}
 											disabled={isPending}
-											disablePast
 										/>
 									</FormControl>
 									<FormMessage />
