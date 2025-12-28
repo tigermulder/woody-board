@@ -1,5 +1,5 @@
 import { Column } from "@/components/kanban/Column";
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Button, Input, ScrollArea, ScrollBar } from "@/components/ui";
 import { useColumnActions } from "@/hooks/useColumnActions";
 import { useColumns } from "@/hooks/useColumns";
@@ -12,6 +12,7 @@ export function Board() {
   const { add } = useColumnActions();
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const addColumnRef = useRef<HTMLDivElement>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [title, setTitle] = useState("");
 
@@ -19,6 +20,26 @@ export function Board() {
     if (!isAdding) return;
     inputRef.current?.focus();
   }, [isAdding]);
+
+  useEffect(() => {
+    if (!isAdding) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (add.isPending) return;
+      const container = addColumnRef.current;
+      const target = event.target as Node | null;
+      if (!container || !target) return;
+      if (!container.contains(target)) {
+        setTitle("");
+        setIsAdding(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+    };
+  }, [isAdding, add.isPending]);
 
   const reset = () => {
     setTitle("");
@@ -53,6 +74,7 @@ export function Board() {
 
         {/* 새 컬럼 추가 버튼 */}
         <div
+          ref={addColumnRef}
           className={cn(
             "h-fit w-80 shrink-0 rounded-xl border-2 p-3 transition-all",
             isAdding
