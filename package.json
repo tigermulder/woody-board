@@ -4,11 +4,11 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
+		"start": "vite",
 		"build": "tsc -b && vite build",
 		"preview": "vite preview",
 		"mock": "node server.js",
-		"dev:all": "concurrently \"npm run mock\" \"npm run dev\"",
+		"dev": "concurrently \"npm run mock\" \"npm run start\"",
 		"fix:all": "biome check --write --unsafe ."
 	},
 	"dependencies": {
