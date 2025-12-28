@@ -14,6 +14,7 @@ export * from "./progress";
 export * from "./resizable";
 export * from "./scroll-area";
 export * from "./sheet";
+export * from "./skeleton";
 export * from "./sonner";
 export * from "./textarea";
 export * from "./tooltip";

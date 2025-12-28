@@ -15,7 +15,13 @@ import { toast } from "sonner";
 import { kanbanApi } from "@/api/kanban";
 import { Column } from "@/components/kanban/Column";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button, Input, ScrollArea, ScrollBar } from "@/components/ui";
+import {
+  Button,
+  Input,
+  ScrollArea,
+  ScrollBar,
+  Skeleton,
+} from "@/components/ui";
 import { useKanbanDispatch, useKanbanState } from "@/contexts/KanbanContext";
 import { useColumnActions } from "@/hooks/useColumnActions";
 import { useColumns } from "@/hooks/useColumns";
@@ -133,9 +139,55 @@ export function Board() {
     return await promise;
   };
 
-  // 전역 로딩바(GlobalQueryLoadingBar)도 동작하지만, 최초 진입 시엔 화면 레이아웃 점프를 줄이기 위해 유지
-  if (isLoading)
-    return <div className="p-6 text-muted-foreground">Loading...</div>;
+  // 스켈레톤 UI
+  if (isLoading) {
+    return (
+      <ScrollArea className="h-[calc(100vh-80px)] w-full">
+        <div className="flex h-full w-max gap-6 p-6">
+          {Array.from({ length: 3 }).map((_, colIdx) => (
+            <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder
+              key={colIdx}
+              className={cn(
+                "flex w-80 shrink-0 flex-col gap-4 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm backdrop-blur-sm",
+                "dark:border-white/10 dark:bg-slate-900/40"
+              )}
+            >
+              {/* column header cap */}
+              <div className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-2 dark:bg-white/5">
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-8 w-8 rounded-md" />
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {Array.from({ length: 3 }).map((__, cardIdx) => (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder
+                    key={cardIdx}
+                    className="rounded-xl border border-border/50 bg-card p-4 shadow-sm dark:border-white/10"
+                  >
+                    <Skeleton className="h-4 w-3/4" />
+                    <div className="mt-3 flex items-center justify-between">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                    <div className="mt-2">
+                      <Skeleton className="h-1 w-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-lg bg-muted/30 p-2 dark:bg-white/5">
+                <Skeleton className="h-8 w-28" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" className="h-2.5" />
+      </ScrollArea>
+    );
+  }
 
   if (isError) {
     const isNetworkError = error.code === "NETWORK_ERROR";
