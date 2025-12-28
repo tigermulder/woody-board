@@ -37,7 +37,7 @@
       "description": "",
       "dueDate": null,
       "createdAt": "2025-12-28T05:50:12.651Z",
-      "updatedAt": "2025-12-28T06:35:25.266Z",
+      "updatedAt": "2025-12-28T07:03:22.241Z",
       "order": 1
     },
     {
@@ -48,7 +48,7 @@
       "dueDate": "2026-01-12T00:00:00.000Z",
       "order": 1,
       "createdAt": "2025-12-28T05:50:09.899Z",
-      "updatedAt": "2025-12-28T06:39:58.092Z"
+      "updatedAt": "2025-12-28T07:03:22.168Z"
     },
     {
       "id": "card_004",

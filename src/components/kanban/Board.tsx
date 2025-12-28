@@ -34,9 +34,7 @@ const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 
 function findContainerId(columns: ColumnType[], id: string) {
-  // column container
   if (columns.some((c) => c.id === id)) return id;
-  // card container
   for (const column of columns) {
     if (column.cards.some((card) => card.id === id)) return column.id;
   }
@@ -58,6 +56,7 @@ function buildCardPositionMap(columns: ColumnType[]) {
 }
 
 export function Board() {
+  const { activeId } = useKanbanState();
   const {
     data: columns,
     isLoading,
@@ -65,10 +64,9 @@ export function Board() {
     error,
     refetch,
     isFetching,
-  } = useColumns();
+  } = useColumns({ pauseRefetch: Boolean(activeId) });
   const { add } = useColumnActions();
   const queryClient = useQueryClient();
-  const { activeId } = useKanbanState();
   const { setActiveId } = useKanbanDispatch();
   const snapshotRef = useRef<ColumnType[] | null>(null);
   const inputId = useId();
