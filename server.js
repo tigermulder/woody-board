@@ -46,6 +46,64 @@ server.use((_req, res, next) => {
 	next();
 });
 
+// --- snake_case -> camelCase 마이그레이션/정규화 ---
+const toIsoOrNull = (value) => {
+	if (!value) return null;
+	const d = new Date(value);
+	return Number.isNaN(d.getTime()) ? null : d.toISOString();
+};
+
+const normalizeColumn = (column) => {
+	const createdAt = column.createdAt ?? column.created_at ?? null;
+	return {
+		...column,
+		createdAt: toIsoOrNull(createdAt) ?? new Date().toISOString(),
+	};
+};
+
+const normalizeCard = (card) => {
+	const now = new Date().toISOString();
+	const createdAt = card.createdAt ?? card.created_at ?? now;
+	const updatedAt = card.updatedAt ?? card.updated_at ?? createdAt ?? now;
+	const dueDate = card.dueDate ?? card.due_date ?? null;
+	const columnId = card.columnId ?? card.column_id;
+
+	return {
+		...card,
+		columnId,
+		dueDate: toIsoOrNull(dueDate),
+		createdAt: toIsoOrNull(createdAt) ?? now,
+		updatedAt: toIsoOrNull(updatedAt) ?? toIsoOrNull(createdAt) ?? now,
+	};
+};
+
+const migrateDbToCamelCase = () => {
+	const db = router.db;
+
+	const columns = db.get("columns").value();
+	const migratedColumns = columns.map((c) => {
+		const next = normalizeColumn(c);
+		// snake 키 제거
+		delete next.created_at;
+		return next;
+	});
+
+	const cards = db.get("cards").value();
+	const migratedCards = cards.map((c) => {
+		const next = normalizeCard(c);
+		delete next.created_at;
+		delete next.updated_at;
+		delete next.due_date;
+		delete next.column_id;
+		return next;
+	});
+
+	db.set("columns", migratedColumns).write();
+	db.set("cards", migratedCards).write();
+};
+
+migrateDbToCamelCase();
+
 // --- API 스펙 ---
 
 // 컬럼 조회
@@ -53,7 +111,11 @@ server.get("/api/columns", (_req, res) => {
 	const db = router.db;
 
 	// 모든 컬럼
-	const columns = db.get("columns").sortBy("order").value();
+	const columns = db
+		.get("columns")
+		.sortBy("order")
+		.value()
+		.map(normalizeColumn);
 
 	// 각 컬럼에 속해 있는 카드를 찾아 매핑
 	const data = columns.map((column) => {
@@ -61,7 +123,8 @@ server.get("/api/columns", (_req, res) => {
 			.get("cards")
 			.filter({ columnId: column.id })
 			.sortBy("order")
-			.value();
+			.value()
+			.map(normalizeCard);
 
 		return {
 			...column,
@@ -97,7 +160,7 @@ server.post("/api/columns", (req, res) => {
 		id: uuidv4(), // UUID
 		title: title,
 		order: newOrder,
-		created_at: new Date().toISOString(),
+		createdAt: new Date().toISOString(),
 	};
 
 	// DB 저장
@@ -131,7 +194,7 @@ server.patch("/api/columns/:id", (req, res) => {
 		.assign({ title: title || column.title })
 		.write();
 
-	res.status(200).json(updatedColumn);
+	res.status(200).json(normalizeColumn(updatedColumn));
 });
 
 // 컬럼 삭제
@@ -170,7 +233,10 @@ server.delete("/api/columns/:id", (req, res) => {
 
 // 카드 생성
 server.post("/api/cards", (req, res) => {
-	const { columnId, title, description, dueDate } = req.body;
+	const { columnId, column_id, title, description, dueDate, due_date } =
+		req.body;
+	const resolvedColumnId = columnId ?? column_id;
+	const resolvedDueDate = dueDate ?? due_date;
 	const db = router.db;
 
 	// 유효성 검사
@@ -186,7 +252,7 @@ server.post("/api/cards", (req, res) => {
 	// 마지막 order 값 계산
 	const lastCard = db
 		.get("cards")
-		.filter({ columnId })
+		.filter({ columnId: resolvedColumnId })
 		.sortBy("order")
 		.last()
 		.value();
@@ -197,25 +263,26 @@ server.post("/api/cards", (req, res) => {
 	const now = new Date().toISOString();
 	const newCard = {
 		id: uuidv4(), // UUID
-		columnId,
+		columnId: resolvedColumnId,
 		title,
 		description: description || "",
-		dueDate: dueDate || null,
+		dueDate: resolvedDueDate || null,
 		order: newOrder,
-		created_at: now,
-		updated_at: now,
+		createdAt: now,
+		updatedAt: now,
 	};
 
 	// DB 저장
 	db.get("cards").push(newCard).write();
 
-	res.status(201).json(newCard);
+	res.status(201).json(normalizeCard(newCard));
 });
 
 // 카드 수정
 server.patch("/api/cards/:id", (req, res) => {
 	const { id } = req.params;
-	const { title, description, dueDate } = req.body;
+	const { title, description, dueDate, due_date } = req.body;
+	const resolvedDueDate = dueDate ?? due_date;
 	const db = router.db;
 
 	// 수정할 카드가 존재하는지 확인
@@ -234,12 +301,12 @@ server.patch("/api/cards/:id", (req, res) => {
 			// 값이 전달된 경우에만 업데이트, 없으면 기존 값 유지
 			title: title !== undefined ? title : card.title,
 			description: description !== undefined ? description : card.description,
-			dueDate: dueDate !== undefined ? dueDate : card.dueDate,
-			updated_at: new Date().toISOString(),
+			dueDate: resolvedDueDate !== undefined ? resolvedDueDate : card.dueDate,
+			updatedAt: new Date().toISOString(),
 		})
 		.write();
 
-	res.status(200).json(updatedCard);
+	res.status(200).json(normalizeCard(updatedCard));
 });
 
 // 카드 삭제
@@ -266,7 +333,9 @@ server.delete("/api/cards/:id", (req, res) => {
 // 카드 이동 및 순서 변경
 server.patch("/api/cards/:id/move", (req, res) => {
 	const { id } = req.params;
-	const { target_column_id, new_order } = req.body;
+	const { target_column_id, new_order, targetColumnId, newOrder } = req.body;
+	const resolvedTargetColumnId = targetColumnId ?? target_column_id;
+	const resolvedNewOrder = newOrder ?? new_order;
 	const db = router.db;
 
 	const card = db.get("cards").find({ id }).value();
@@ -278,13 +347,13 @@ server.patch("/api/cards/:id/move", (req, res) => {
 		.get("cards")
 		.find({ id })
 		.assign({
-			columnId: target_column_id,
-			order: new_order,
-			updated_at: new Date().toISOString(),
+			columnId: resolvedTargetColumnId,
+			order: resolvedNewOrder,
+			updatedAt: new Date().toISOString(),
 		})
 		.write();
 
-	res.status(200).json(updatedCard);
+	res.status(200).json(normalizeCard(updatedCard));
 });
 
 // --- 기본 라우터 ---

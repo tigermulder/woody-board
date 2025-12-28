@@ -74,12 +74,12 @@ export const kanbanApi = {
 	},
 
 	// 카드 이동 및 순서 변경
-	moveCard: async (id: string, target_column_id: string, new_order: number) => {
+	moveCard: async (id: string, targetColumnId: string, newOrder: number) => {
 		return await axiosInstance.patch<ApiSuccess<CardType>, CardType>(
 			`/cards/${id}/move`,
 			{
-				target_column_id,
-				new_order,
+				targetColumnId,
+				newOrder,
 			},
 		);
 	},

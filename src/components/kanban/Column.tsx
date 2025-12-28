@@ -54,6 +54,7 @@ export function Column({ column }: { column: ColumnType }) {
 	const [isEditingTitle, setIsEditingTitle] = useState(false);
 	const [draftTitle, setDraftTitle] = useState(column.title);
 	const titleInputRef = useRef<HTMLInputElement>(null);
+	const ignoreNextBlurRef = useRef(false);
 
 	const { remove, update } = useColumnActions();
 	const { add } = useCardActions();
@@ -168,14 +169,29 @@ export function Column({ column }: { column: ColumnType }) {
 							}
 							if (e.key === "Escape") {
 								e.preventDefault();
+								ignoreNextBlurRef.current = true;
 								cancelEditTitle();
 							}
 						}}
-						onBlur={cancelEditTitle}
+						onBlur={() => {
+							if (ignoreNextBlurRef.current) {
+								ignoreNextBlurRef.current = false;
+								return;
+							}
+							void commitEditTitle();
+						}}
 						className="h-9 font-bold text-foreground text-lg"
 					/>
 				) : (
-					<h3 className="font-bold text-foreground text-lg">{column.title}</h3>
+					<button
+						type="button"
+						className="truncate text-left font-bold text-foreground text-lg"
+						disabled={update.isPending || remove.isPending}
+						onClick={startEditTitle}
+						title="클릭해서 제목 수정"
+					>
+						{column.title}
+					</button>
 				)}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>

@@ -14,6 +14,12 @@
 			"id": "col_003",
 			"title": "Done",
 			"order": 2
+		},
+		{
+			"id": "3a8c2b4e-4120-45b8-995a-e82c5d9e33fc",
+			"title": "test",
+			"order": 3,
+			"createdAt": "2025-12-28T06:02:48.418Z"
 		}
 	],
 	"cards": [
@@ -23,8 +29,9 @@
 			"title": "프로젝트 요구사항 분석",
 			"description": "클라이언트 미팅 내용을 바탕으로 요구사항 문서 작성",
 			"dueDate": "2026-01-15T00:00:00Z",
-			"order": 1,
-			"updated_at": "2025-12-28T05:45:11.693Z"
+			"order": 0,
+			"createdAt": "2025-12-28T05:50:06.055Z",
+			"updatedAt": "2025-12-28T05:50:06.055Z"
 		},
 		{
 			"id": "card_002",
@@ -32,8 +39,9 @@
 			"title": "기술 스택 검토",
 			"description": "",
 			"dueDate": null,
-			"order": 0,
-			"updated_at": "2025-12-28T05:45:11.690Z"
+			"order": 1,
+			"createdAt": "2025-12-28T05:50:12.651Z",
+			"updatedAt": "2025-12-28T05:50:12.651Z"
 		},
 		{
 			"id": "card_003",
@@ -42,7 +50,8 @@
 			"description": "Figma를 사용하여 주요 화면 와이어프레임 작성",
 			"dueDate": "2026-01-12T00:00:00Z",
 			"order": 0,
-			"updated_at": "2025-12-28T05:45:02.608Z"
+			"createdAt": "2025-12-28T05:50:09.899Z",
+			"updatedAt": "2025-12-28T05:50:09.899Z"
 		},
 		{
 			"id": "card_004",
@@ -51,7 +60,8 @@
 			"description": "Vite + React + TypeScript 프로젝트 초기 설정 완료",
 			"dueDate": "2025-12-31",
 			"order": 0,
-			"updated_at": "2025-12-28T05:00:30.616Z"
+			"createdAt": "2025-12-28T05:00:30.616Z",
+			"updatedAt": "2025-12-28T05:00:30.616Z"
 		},
 		{
 			"id": "card_005",
@@ -59,7 +69,9 @@
 			"title": "레거시 데이터 정리",
 			"description": "이전 프로젝트에서 마이그레이션된 태스크",
 			"dueDate": "2025-01-05T00:00:00Z",
-			"order": 0
+			"order": 0,
+			"createdAt": "2025-12-28T00:00:00.000Z",
+			"updatedAt": "2025-12-28T00:00:00.000Z"
 		},
 		{
 			"id": "2369f63f-fae3-4818-87cd-2d2993191bb7",
@@ -68,8 +80,8 @@
 			"description": "",
 			"dueDate": "2025-12-31",
 			"order": 1,
-			"created_at": "2025-12-28T03:40:32.044Z",
-			"updated_at": "2025-12-28T05:45:02.810Z"
+			"createdAt": "2025-12-28T03:40:32.044Z",
+			"updatedAt": "2025-12-28T05:50:12.618Z"
 		},
 		{
 			"id": "9d4dc925-f816-4c7b-b326-113d9e19f9e3",
@@ -78,8 +90,8 @@
 			"description": "test 입니다",
 			"dueDate": null,
 			"order": 1,
-			"created_at": "2025-12-28T04:28:37.529Z",
-			"updated_at": "2025-12-28T04:44:56.826Z"
+			"createdAt": "2025-12-28T04:28:37.529Z",
+			"updatedAt": "2025-12-28T04:44:56.826Z"
 		}
 	]
 }
