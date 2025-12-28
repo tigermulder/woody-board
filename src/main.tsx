@@ -10,14 +10,14 @@ import { KanbanProvider } from "./contexts/KanbanContext";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<QueryClientProvider client={queryClient}>
-			<ThemeProvider defaultTheme="light">
-				<KanbanProvider>
-					<App />
-				</KanbanProvider>
-			</ThemeProvider>
-			<ReactQueryDevtools initialIsOpen={false} />
-		</QueryClientProvider>
-	</StrictMode>,
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light">
+        <KanbanProvider>
+          <App />
+        </KanbanProvider>
+      </ThemeProvider>
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+    </QueryClientProvider>
+  </StrictMode>
 );

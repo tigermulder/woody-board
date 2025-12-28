@@ -56,6 +56,26 @@
       "description": "이전 프로젝트에서 마이그레이션된 태스크",
       "dueDate": "2025-01-05T00:00:00Z",
       "order": 0
+    },
+    {
+      "id": "c6624a46-6ec8-434b-bc97-960c7450f9c0",
+      "columnId": "col_002",
+      "title": "test",
+      "description": "",
+      "dueDate": null,
+      "order": 1,
+      "created_at": "2025-12-28T03:34:10.877Z",
+      "updated_at": "2025-12-28T03:34:10.877Z"
+    },
+    {
+      "id": "2369f63f-fae3-4818-87cd-2d2993191bb7",
+      "columnId": "col_002",
+      "title": "test2",
+      "description": "test2",
+      "dueDate": "2025-12-31",
+      "order": 2,
+      "created_at": "2025-12-28T03:40:32.044Z",
+      "updated_at": "2025-12-28T03:40:32.044Z"
     }
   ]
 }

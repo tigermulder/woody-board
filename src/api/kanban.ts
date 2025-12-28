@@ -43,9 +43,10 @@ export const kanbanApi = {
 
 	// 카드 생성
 	createCard: async (params: {
-		column_id: string;
+		columnId: string;
 		title: string;
 		description?: string;
+		dueDate?: string | null;
 	}) => {
 		return await axiosInstance.post<ApiSuccess<CardType>, CardType>(
 			"/cards",

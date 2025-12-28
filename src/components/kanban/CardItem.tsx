@@ -1,34 +1,9 @@
-import {
-  AlignLeft,
-  Calendar,
-  CalendarX2,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { AlignLeft, Calendar, CalendarX2 } from "lucide-react";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-  Progress,
-} from "@/components/ui";
+import { Progress } from "@/components/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCardActions } from "@/hooks/useCardActions";
 import { cn } from "@/lib/utils";
-import type { ApiError, CardType } from "@/types/api";
-import { toast } from "sonner";
+import type { CardType } from "@/types/api";
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 const DUE_WINDOW_DAYS = 30;
@@ -39,7 +14,7 @@ const clamp = (value: number, min: number, max: number) =>
 const toLocalEndOfDay = (d: Date) =>
   new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
-// 마감 임박 진행률 계산 (마감 30일 전 0% → 마감일 100%)
+// 마감 임박 진행률 계산
 const getScheduleStats = (dueDate: string | null) => {
   if (!dueDate) return null;
 
@@ -53,44 +28,14 @@ const getScheduleStats = (dueDate: string | null) => {
   return { diffDays, progress };
 };
 
-export function CardItem({
-  card,
-  onEdit,
-}: {
-  card: CardType;
-  onEdit?: (card: CardType) => void;
-}) {
+export function CardItem({ card }: { card: CardType }) {
   const [isPressed, setIsPressed] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const { remove } = useCardActions();
   const dDayStats = getScheduleStats(card.dueDate);
   const hasDescription = Boolean(card.description?.trim());
 
-  const handleDelete = () => {
-    const promise = remove.mutateAsync(card.id);
-    toast.promise(promise, {
-      loading: "카드 삭제 중...",
-      success: () => {
-        setDeleteDialogOpen(false);
-        return "카드가 삭제되었습니다.";
-      },
-      error: (error) =>
-        (error as ApiError)?.message ?? "카드 삭제에 실패했습니다.",
-    });
-    return promise;
-  };
-
-  const handleEdit = () => {
-    onEdit?.(card);
-  };
-
   return (
     <Card
-      onPointerDown={(e) => {
-        const target = e.target as HTMLElement | null;
-        if (target?.closest("[data-card-action]")) return;
-        setIsPressed(true);
-      }}
+      onPointerDown={() => setIsPressed(true)}
       onPointerUp={() => setIsPressed(false)}
       onPointerCancel={() => setIsPressed(false)}
       onPointerLeave={() => setIsPressed(false)}
@@ -115,95 +60,8 @@ export function CardItem({
               />
             ) : null}
           </div>
-
-          <div className="flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  data-card-action
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 cursor-pointer opacity-0 group-hover:opacity-100"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={handleEdit}
-                >
-                  수정하기
-                  <DropdownMenuShortcut>
-                    <Pencil className="h-3.5 w-3.5 opacity-70" />
-                  </DropdownMenuShortcut>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer text-destructive"
-                  onClick={() => setDeleteDialogOpen(true)}
-                  disabled={remove.isPending}
-                >
-                  삭제하기
-                  <DropdownMenuShortcut>
-                    <Trash2 className="h-3.5 w-3.5 opacity-70" />
-                  </DropdownMenuShortcut>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
       </CardHeader>
-
-      <AlertDialog
-        open={deleteDialogOpen}
-        onOpenChange={(open) => {
-          if (remove.isPending) return;
-          setDeleteDialogOpen(open);
-        }}
-      >
-        <AlertDialogContent className="overflow-hidden p-0 sm:max-w-[680px]">
-          <div className="flex gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-              <Trash2 className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <AlertDialogHeader className="gap-2 text-left">
-                <AlertDialogTitle className="font-bold text-2xl leading-tight">
-                  카드를 삭제할까요?
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-base leading-relaxed">
-                  <span className="font-medium text-foreground">
-                    {card.title}
-                  </span>
-                  을(를) 삭제합니다. 이 작업은 되돌릴 수 없습니다.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-            </div>
-          </div>
-
-          <div className="border-t bg-muted/40 px-6 py-4">
-            <AlertDialogFooter className="gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <AlertDialogCancel
-                disabled={remove.isPending}
-                className="h-11 px-8"
-              >
-                취소
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                disabled={remove.isPending}
-                className="h-11 cursor-pointer bg-destructive px-10 text-destructive-foreground hover:bg-destructive/90"
-              >
-                {remove.isPending ? (
-                  "삭제 중..."
-                ) : (
-                  <span className="text-white">확인</span>
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <CardContent className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <div className="mt-auto space-y-2">
